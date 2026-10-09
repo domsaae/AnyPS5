@@ -303,6 +303,11 @@ const short* APS5_VABI _Getpctype_nid_postfix() {
     return g_classificationTable.data() + 1;
 }
 
+int APS5_VABI _Iswctype_nid_postfix(std::uint32_t character, std::uint32_t type) {
+    if (character > 255) return 0;
+    return static_cast<int>(_Getpctype_nid_postfix()[character]) & static_cast<int>(type);
+}
+
 const short* APS5_VABI _Getptolower_nid_postfix() {
     return g_lowerTable.data() + 1;
 }
