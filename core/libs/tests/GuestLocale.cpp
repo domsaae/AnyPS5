@@ -1,5 +1,6 @@
 #include "prx/libc/include/GuestLocale.hpp"
 #include <array>
+#include <cstdint>
 #include <cstring>
 #include <cwchar>
 #include <climits>
@@ -17,6 +18,7 @@ void APS5_VABI _ZNSt8_LocinfoC1EPKc_nid_postfix(GuestLocale::LocinfoStorage* sel
 void APS5_VABI _ZNSt8_LocinfoD1Ev_nid_postfix(GuestLocale::LocinfoStorage* self);
 void APS5_VABI _ZNSt8ios_baseD2Ev_nid_postfix(GuestLocale::IosBase* self);
 const short* APS5_VABI _Getpctype_nid_postfix();
+int APS5_VABI _Iswctype_nid_postfix(std::uint32_t character, std::uint32_t type);
 const short* APS5_VABI _Getptolower_nid_postfix();
 const short* APS5_VABI _Getptoupper_nid_postfix();
 int APS5_VABI _Mbtowcx_nid_postfix(std::uint16_t* dst, const char* src, std::size_t count, std::mbstate_t* st);
@@ -100,7 +102,18 @@ static void CheckCharacterTables() {
         Require(lower[value] == (value >= 'A' && value <= 'Z' ? value + 32 : value));
         Require(upper[value] == (value >= 'a' && value <= 'z' ? value - 32 : value));
         if (value >= 128) Require(classification[value] == 0);
+        Require(_Iswctype_nid_postfix(static_cast<std::uint32_t>(value), 0xffffffffu) == classification[value]);
     }
+    Require(_Iswctype_nid_postfix(u'A', 0x02) == 0x02);
+    Require(_Iswctype_nid_postfix(u'A', 0x10) == 0);
+    Require(_Iswctype_nid_postfix(u'A', 0x232) == 0x02);
+    Require(_Iswctype_nid_postfix(u'0', 0x232) == 0x20);
+    Require(_Iswctype_nid_postfix(u'!', 0x232) == 0);
+    Require(_Iswctype_nid_postfix(u' ', 0x04) == 0x04);
+    Require(_Iswctype_nid_postfix(u'\t', 0xc0) == 0xc0);
+    Require(_Iswctype_nid_postfix(0xffffu, 0xffffffffu) == 0);
+    Require(_Iswctype_nid_postfix(0x100u, 0xffffffffu) == 0);
+    Require(_Iswctype_nid_postfix(0xffffffffu, 0xffffffffu) == 0);
 }
 
 static void CheckCharacterConversions() {
